@@ -149,7 +149,7 @@ import org.jetbrains.annotations.NotNull;
 public class ConnectedPlayer implements MinecraftConnectionAssociation, Player, KeyIdentifiable,
     VelocityInboundConnection {
 
-  private static final int MAX_CLIENTSIDE_PLUGIN_CHANNELS = 1024;
+  public static final int MAX_CLIENTSIDE_PLUGIN_CHANNELS = 1024;
   private static final PlainTextComponentSerializer PASS_THRU_TRANSLATE =
       PlainTextComponentSerializer.builder().flattener(TranslatableMapper.FLATTENER).build();
   static final PermissionProvider DEFAULT_PERMISSIONS = s -> PermissionFunction.ALWAYS_UNDEFINED;
@@ -179,7 +179,7 @@ public class ConnectedPlayer implements MinecraftConnectionAssociation, Player, 
   private final InternalTabList tabList;
   private final VelocityServer server;
   private ClientConnectionPhase connectionPhase;
-  private final Collection<String> clientsideChannels;
+  private final Collection<ChannelIdentifier> clientsideChannels;
   private final CompletableFuture<Void> teardownFuture = new CompletableFuture<>();
   private @MonotonicNonNull List<String> serversToTry = null;
   private final ResourcePackHandler resourcePackHandler;
@@ -1347,6 +1347,7 @@ public class ConnectedPlayer implements MinecraftConnectionAssociation, Player, 
             connection.write(BundleDelimiterPacket.INSTANCE);
           }
           connection.write(StartUpdatePacket.INSTANCE);
+          connection.pendingConfigurationSwitch = true;
           connection.getChannel().pipeline().get(MinecraftEncoder.class).setState(StateRegistry.CONFIG);
           // Make sure we don't send any play packets to the player after update start
           connection.addPlayPacketQueueHandler();
@@ -1380,7 +1381,7 @@ public class ConnectedPlayer implements MinecraftConnectionAssociation, Player, 
    *
    * @return the channels
    */
-  public Collection<String> getClientsideChannels() {
+  public Collection<ChannelIdentifier> getClientsideChannels() {
     return clientsideChannels;
   }
 
