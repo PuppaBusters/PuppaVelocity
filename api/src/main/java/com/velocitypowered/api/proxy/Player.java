@@ -403,18 +403,26 @@ public interface Player extends
   /**
    * {@inheritDoc}
    *
-   * <b>This method is not currently implemented in Velocity
-   * and will not perform any actions.</b>
+   * <p>Note: This method is currently only implemented for players from version 1.19.3 and above
+   * and requires a present {@link #getCurrentServer}. Additionally, it only supports {@link Sound.Emitter#self()} for now.
+   *
+   * @param sound the sound to play
+   * @param emitter the emitter of the sound
+   * @since 3.4.0
+   * @sinceMinecraft 1.19.3
    */
   @Override
-  default void playSound(@NotNull Sound sound, Sound.Emitter emitter) {
+  default void playSound(@NotNull Sound sound, @NotNull Sound.Emitter emitter) {
   }
 
   /**
    * {@inheritDoc}
    *
-   * <b>This method is not currently implemented in Velocity
-   * and will not perform any actions.</b>
+   * <p>Note: This method is currently only implemented for players from version 1.19.3 and above.
+   *
+   * @param stop the sound and/or a sound source, to stop
+   * @since 3.4.0
+   * @sinceMinecraft 1.19.3
    */
   @Override
   default void stopSound(@NotNull SoundStop stop) {

@@ -73,6 +73,8 @@ import com.velocitypowered.proxy.protocol.netty.MinecraftEncoder;
 import com.velocitypowered.proxy.protocol.packet.BundleDelimiterPacket;
 import com.velocitypowered.proxy.protocol.packet.ClientSettingsPacket;
 import com.velocitypowered.proxy.protocol.packet.ClientboundCookieRequestPacket;
+import com.velocitypowered.proxy.protocol.packet.ClientboundSoundEntityPacket;
+import com.velocitypowered.proxy.protocol.packet.ClientboundStopSoundPacket;
 import com.velocitypowered.proxy.protocol.packet.ClientboundStoreCookiePacket;
 import com.velocitypowered.proxy.protocol.packet.DisconnectPacket;
 import com.velocitypowered.proxy.protocol.packet.HeaderAndFooterPacket;
@@ -126,6 +128,8 @@ import net.kyori.adventure.pointer.Pointers;
 import net.kyori.adventure.resource.ResourcePackInfoLike;
 import net.kyori.adventure.resource.ResourcePackRequest;
 import net.kyori.adventure.resource.ResourcePackRequestLike;
+import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.sound.SoundStop;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
@@ -1028,6 +1032,31 @@ public class ConnectedPlayer implements MinecraftConnectionAssociation, Player, 
 
   void setClientBrand(final @Nullable String clientBrand) {
     this.clientBrand = clientBrand;
+  }
+
+  @Override
+  public void playSound(@NotNull Sound sound, @NotNull Sound.Emitter emitter) {
+    Preconditions.checkNotNull(sound, "sound");
+    Preconditions.checkNotNull(emitter, "emitter");
+    Preconditions.checkArgument(emitter.equals(Sound.Emitter.self()), "non-self emitter not supported");
+    if (getProtocolVersion().lessThan(ProtocolVersion.MINECRAFT_1_19_3)
+        || connection.getState() != StateRegistry.PLAY
+        || getConnectedServer() == null) {
+      return;
+    }
+
+    connection.write(new ClientboundSoundEntityPacket(sound, null, getConnectedServer().getEntityId()));
+  }
+
+  @Override
+  public void stopSound(@NotNull SoundStop stop) {
+    Preconditions.checkNotNull(stop, "stop");
+    if (getProtocolVersion().lessThan(ProtocolVersion.MINECRAFT_1_19_3)
+        || connection.getState() != StateRegistry.PLAY) {
+      return;
+    }
+
+    connection.write(new ClientboundStopSoundPacket(stop));
   }
 
   @Override
