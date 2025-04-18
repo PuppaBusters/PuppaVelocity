@@ -1035,6 +1035,11 @@ public class ConnectedPlayer implements MinecraftConnectionAssociation, Player, 
   }
 
   @Override
+  public void playSound(@NotNull Sound sound) {
+    playSound(sound, Sound.Emitter.self());
+  }
+
+  @Override
   public void playSound(@NotNull Sound sound, @NotNull Sound.Emitter emitter) {
     Preconditions.checkNotNull(sound, "sound");
     Preconditions.checkNotNull(emitter, "emitter");
@@ -1057,6 +1062,11 @@ public class ConnectedPlayer implements MinecraftConnectionAssociation, Player, 
     }
 
     connection.write(new ClientboundStopSoundPacket(stop));
+  }
+
+  @Override
+  public void stopSound(@NotNull Sound sound) {
+    stopSound(SoundStop.named(sound.name()));
   }
 
   @Override
