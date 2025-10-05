@@ -1047,6 +1047,11 @@ public class ConnectedPlayer implements MinecraftConnectionAssociation, Player, 
   }
 
   @Override
+  public void playSound(@NotNull Sound sound) {
+    playSound(sound, Sound.Emitter.self());
+  }
+
+  @Override
   public void playSound(@NotNull Sound sound, @NotNull Sound.Emitter emitter) {
     Preconditions.checkNotNull(sound, "sound");
     Preconditions.checkNotNull(emitter, "emitter");
