@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Velocity Contributors
+ * Copyright (C) 2025 Velocity Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,14 +33,14 @@ public class ClientboundSoundEntityPacket implements MinecraftPacket {
 
   private Sound sound;
   private @Nullable Float fixedRange;
-  private int entityId;
+  private int emitterEntityId;
 
   public ClientboundSoundEntityPacket() {}
 
-  public ClientboundSoundEntityPacket(Sound sound, @Nullable Float fixedRange, int entityId) {
+  public ClientboundSoundEntityPacket(Sound sound, @Nullable Float fixedRange, int emitterEntityId) {
     this.sound = sound;
     this.fixedRange = fixedRange;
-    this.entityId = entityId;
+    this.emitterEntityId = emitterEntityId;
   }
 
   @Override
@@ -50,17 +50,17 @@ public class ClientboundSoundEntityPacket implements MinecraftPacket {
 
   @Override
   public void encode(ByteBuf buf, ProtocolUtils.Direction direction, ProtocolVersion protocolVersion) {
-    ProtocolUtils.writeVarInt(buf, 0); // version-dependent hardcoded sound id
+    ProtocolUtils.writeVarInt(buf, 0); // version-dependent, hardcoded sound ID
 
-    ProtocolUtils.writeString(buf, sound.name().asMinimalString()); // not using writeKey, as the client already defaults to the vanilla namespace
+    ProtocolUtils.writeMinimalKey(buf, sound.name());
 
     buf.writeBoolean(fixedRange != null);
     if (fixedRange != null)
       buf.writeFloat(fixedRange);
 
-    ProtocolUtils.writeVarInt(buf, sound.source().ordinal());
+    ProtocolUtils.writeSoundSource(buf, protocolVersion, sound.source());
 
-    ProtocolUtils.writeVarInt(buf, entityId);
+    ProtocolUtils.writeVarInt(buf, emitterEntityId);
 
     buf.writeFloat(sound.volume());
 
@@ -72,6 +72,30 @@ public class ClientboundSoundEntityPacket implements MinecraftPacket {
   @Override
   public boolean handle(MinecraftSessionHandler handler) {
     return handler.handle(this);
+  }
+
+  public Sound getSound() {
+    return sound;
+  }
+
+  public void setSound(Sound sound) {
+    this.sound = sound;
+  }
+
+  public @Nullable Float getFixedRange() {
+    return fixedRange;
+  }
+
+  public void setFixedRange(@Nullable Float fixedRange) {
+    this.fixedRange = fixedRange;
+  }
+
+  public int getEmitterEntityId() {
+    return emitterEntityId;
+  }
+
+  public void setEmitterEntityId(int emitterEntityId) {
+    this.emitterEntityId = emitterEntityId;
   }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Velocity Contributors
+ * Copyright (C) 2025 Velocity Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ public class ClientboundStopSoundPacket implements MinecraftPacket {
     int flagsBitmask = buf.readByte();
 
     if ((flagsBitmask & 1) != 0) {
-      source = Sound.Source.values()[ProtocolUtils.readVarInt(buf)];
+      source = ProtocolUtils.readSoundSource(buf, protocolVersion);
     } else {
       source = null;
     }
@@ -75,11 +75,11 @@ public class ClientboundStopSoundPacket implements MinecraftPacket {
     buf.writeByte(flagsBitmask);
 
     if (source != null) {
-      ProtocolUtils.writeVarInt(buf, source.ordinal());
+      ProtocolUtils.writeSoundSource(buf, protocolVersion, source);
     }
 
     if (soundName != null) {
-      ProtocolUtils.writeString(buf, soundName.asMinimalString()); // not using writeKey, as the client already defaults to the vanilla namespace
+      ProtocolUtils.writeMinimalKey(buf, soundName);
     }
   }
 
@@ -93,9 +93,17 @@ public class ClientboundStopSoundPacket implements MinecraftPacket {
     return source;
   }
 
+  public void setSource(@Nullable Sound.Source source) {
+    this.source = source;
+  }
+
   @Nullable
   public Key getSoundName() {
     return soundName;
+  }
+
+  public void setSoundName(@Nullable Key soundName) {
+    this.soundName = soundName;
   }
 
 }

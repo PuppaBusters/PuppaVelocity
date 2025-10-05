@@ -737,15 +737,19 @@ public class ConnectedPlayer implements MinecraftConnectionAssociation, Player, 
     Component disconnectReason = disconnect.getReason().getComponent();
     String plainTextReason = PASS_THRU_TRANSLATE.serialize(disconnectReason);
     if (connectedServer != null && connectedServer.getServerInfo().equals(server.getServerInfo())) {
-      logger.info("{}: kicked from server {}: {}", this, server.getServerInfo().getName(),
-          plainTextReason);
+      if (this.server.getConfiguration().isLogPlayerConnections()) {
+        logger.info("{}: kicked from server {}: {}", this, server.getServerInfo().getName(),
+            plainTextReason);
+      }
       handleConnectionException(server, disconnectReason,
           Component.translatable("velocity.error.moved-to-new-server", NamedTextColor.RED,
               Component.text(server.getServerInfo().getName()),
               disconnectReason), safe);
     } else {
-      logger.error("{}: disconnected while connecting to {}: {}", this,
-          server.getServerInfo().getName(), plainTextReason);
+      if (this.server.getConfiguration().isLogPlayerConnections()) {
+        logger.error("{}: disconnected while connecting to {}: {}", this,
+            server.getServerInfo().getName(), plainTextReason);
+      }
       handleConnectionException(server, disconnectReason,
           Component.translatable("velocity.error.cant-connect", NamedTextColor.RED,
               Component.text(server.getServerInfo().getName()),
@@ -1043,38 +1047,47 @@ public class ConnectedPlayer implements MinecraftConnectionAssociation, Player, 
   }
 
   @Override
-  public void playSound(@NotNull Sound sound) {
-    playSound(sound, Sound.Emitter.self());
-  }
-
-  @Override
   public void playSound(@NotNull Sound sound, @NotNull Sound.Emitter emitter) {
     Preconditions.checkNotNull(sound, "sound");
     Preconditions.checkNotNull(emitter, "emitter");
-    Preconditions.checkArgument(emitter.equals(Sound.Emitter.self()), "non-self emitter not supported");
+    VelocityServerConnection soundTargetServerConn = getConnectedServer();
     if (getProtocolVersion().lessThan(ProtocolVersion.MINECRAFT_1_19_3)
         || connection.getState() != StateRegistry.PLAY
-        || getConnectedServer() == null) {
+        || soundTargetServerConn == null
+        || (sound.source() == Sound.Source.UI
+            && getProtocolVersion().lessThan(ProtocolVersion.MINECRAFT_1_21_5))) {
       return;
     }
 
-    connection.write(new ClientboundSoundEntityPacket(sound, null, getConnectedServer().getEntityId()));
+    VelocityServerConnection soundEmitterServerConn;
+    if (emitter == Sound.Emitter.self()) {
+      soundEmitterServerConn = soundTargetServerConn;
+    } else if (emitter instanceof ConnectedPlayer player) {
+      if ((soundEmitterServerConn = player.getConnectedServer()) == null) {
+        return;
+      }
+
+      if (!soundEmitterServerConn.getServer().equals(soundTargetServerConn.getServer())) {
+        return;
+      }
+    } else {
+      return;
+    }
+
+    connection.write(new ClientboundSoundEntityPacket(sound, null, soundEmitterServerConn.getEntityId()));
   }
 
   @Override
   public void stopSound(@NotNull SoundStop stop) {
     Preconditions.checkNotNull(stop, "stop");
     if (getProtocolVersion().lessThan(ProtocolVersion.MINECRAFT_1_19_3)
-        || connection.getState() != StateRegistry.PLAY) {
+        || connection.getState() != StateRegistry.PLAY
+        || (stop.source() == Sound.Source.UI
+            && getProtocolVersion().lessThan(ProtocolVersion.MINECRAFT_1_21_5))) {
       return;
     }
 
     connection.write(new ClientboundStopSoundPacket(stop));
-  }
-
-  @Override
-  public void stopSound(@NotNull Sound sound) {
-    stopSound(SoundStop.named(sound.name()));
   }
 
   @Override
