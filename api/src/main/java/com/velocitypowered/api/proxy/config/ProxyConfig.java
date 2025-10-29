@@ -84,7 +84,7 @@ public interface ProxyConfig {
    *
    * @return registered servers map
    */
-  Map<String, BackendServerConfig> getServers();
+  Map<String, String> getServers();
 
   /**
    * Get the order of servers that players will be connected to.
