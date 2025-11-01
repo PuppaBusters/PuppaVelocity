@@ -393,6 +393,7 @@ public interface Player extends
    */
   @Override
   default void playSound(@NotNull Sound sound) {
+    playSound(sound, Sound.Emitter.self());
   }
 
   /**
