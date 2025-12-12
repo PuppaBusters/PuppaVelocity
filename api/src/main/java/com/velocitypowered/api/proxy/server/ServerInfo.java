@@ -20,6 +20,8 @@ public final class ServerInfo implements Comparable<ServerInfo> {
 
   private final String name;
   private final InetSocketAddress address;
+
+  @Nullable
   private final ServerInfoForwardingMode forwardingMode;
 
   /**
@@ -27,13 +29,13 @@ public final class ServerInfo implements Comparable<ServerInfo> {
    *
    * @param name the name for the server
    * @param address the address of the server to connect to
-   * @param forwardingMode the server info forwarding mode
+   * @param forwardingMode the server info forwarding mode, or {@code null} if the mode from the config should be used
    * @since 3.4.0
    */
-  public ServerInfo(String name, InetSocketAddress address, ServerInfoForwardingMode forwardingMode) {
+  public ServerInfo(String name, InetSocketAddress address, @Nullable ServerInfoForwardingMode forwardingMode) {
     this.name = Preconditions.checkNotNull(name, "name");
     this.address = Preconditions.checkNotNull(address, "address");
-    this.forwardingMode = Preconditions.checkNotNull(forwardingMode, "forwardingMode");
+    this.forwardingMode = forwardingMode;
   }
 
   /**
@@ -45,7 +47,7 @@ public final class ServerInfo implements Comparable<ServerInfo> {
   public ServerInfo(String name, InetSocketAddress address) {
     this.name = Preconditions.checkNotNull(name, "name");
     this.address = Preconditions.checkNotNull(address, "address");
-    this.forwardingMode = ServerInfoForwardingMode.FOLLOWUP;
+    this.forwardingMode = null;
   }
 
   public final String getName() {
@@ -57,10 +59,12 @@ public final class ServerInfo implements Comparable<ServerInfo> {
   }
 
   /**
-   * Get what mode will the backend server use to communicate with velocity.
+   * Returns the forwarding mode used by the backend server to communicate with Velocity.
    *
-   * @return FOLLOWUP mode if the server uses the same mode as set in the main config else one of the available modes
+   * @return the configured forwarding mode for the server, or {@code null}
+   *     if the mode is inherited from the "player-info-forwarding-mode" set in the config
    */
+  @Nullable
   public final ServerInfoForwardingMode getServerInfoForwardingMode() {
     return forwardingMode;
   }
