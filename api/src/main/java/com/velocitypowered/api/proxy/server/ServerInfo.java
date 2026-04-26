@@ -50,21 +50,11 @@ public final class ServerInfo implements Comparable<ServerInfo> {
     this.forwardingMode = null;
   }
 
-  /**
-   * Gets the name of the server.
-   *
-   * @return the name of the server
-   */
-  public String getName() {
+  public final String getName() {
     return name;
   }
 
-  /**
-   * Gets the network address of the server.
-   *
-   * @return the {@link InetSocketAddress} of the server
-   */
-  public InetSocketAddress getAddress() {
+  public final InetSocketAddress getAddress() {
     return address;
   }
 
@@ -89,7 +79,7 @@ public final class ServerInfo implements Comparable<ServerInfo> {
   }
 
   @Override
-  public boolean equals(@Nullable Object o) {
+  public final boolean equals(@Nullable Object o) {
     if (this == o) {
       return true;
     }
@@ -101,9 +91,10 @@ public final class ServerInfo implements Comparable<ServerInfo> {
         && Objects.equals(forwardingMode, that.forwardingMode);
   }
 
-  @Override
-  public int hashCode() {
+    @Override
+  public final int hashCode() {
     return Objects.hash(name, address, forwardingMode);
+  }
 
   @Override
   public int compareTo(ServerInfo o) {

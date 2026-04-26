@@ -42,7 +42,7 @@ forwarding-secret-file = "forwarding.secret"
 
 # Announce whether or not your server supports Forge. If you run a modded server, we
 # suggest turning this on.
-#
+# 
 # If your network runs one modpack consistently, consider using ping-passthrough = "mods"
 # instead for a nicer display in the server list.
 announce-forge = false
@@ -73,6 +73,11 @@ sample-players-in-ping = false
 
 # If not enabled (default is true) player IP addresses will be replaced by <ip address withheld> in logs
 enable-player-address-logging = true
+
+[packet-limiter]
+interval = 7
+packets-per-second = 500
+bytes-per-second = -1
 
 [servers]
 # Configure your servers here. Each key represents the server's name, and the value

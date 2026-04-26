@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2023 Velocity Contributors
+ * Copyright (C) 2025 Velocity Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,21 +15,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.velocitypowered.proxy.protocol.packet.chat;
+package com.velocitypowered.proxy.network.limiter;
 
-import com.velocitypowered.proxy.protocol.MinecraftPacket;
-
-public interface ChatHandler<T extends MinecraftPacket> {
-
-  Class<T> packetClass();
-
-  void handlePlayerChatInternal(T packet);
-
-  default boolean handlePlayerChat(MinecraftPacket packet) {
-    if (packetClass().isInstance(packet)) {
-      handlePlayerChatInternal(packetClass().cast(packet));
-      return true;
-    }
-    return false;
-  }
+/**
+ * PacketLimiter enforces a limit on the number of bytes processed over a time window.
+ * Implementations should be thread-safe.
+ */
+public interface PacketLimiter {
+  /**
+   * Attempts to record the specified number of bytes within the current window.
+   *
+   * @param bytes the number of bytes to record
+   * @return true if the bytes are allowed and recorded; false if the limit would be exceeded
+   */
+  boolean account(int bytes);
 }
